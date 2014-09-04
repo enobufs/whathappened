@@ -1,0 +1,36 @@
+{
+  "name": "whathappened",
+  "version": "0.0.1",
+  "description": "List up recently updated modules.",
+  "main": "index.js",
+  "scripts": {
+    "test": "DEBUG=whathappened node_modules/.bin/mocha",
+    "cover": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/enobufs/whathappened.git"
+  },
+  "dependencies": {
+    "express": "^3.16.9",
+    "semver": "^3.0.1",
+    "async": "^0.9.0",
+    "debug": "~1.0.4",
+    "underscore": "1.6.x"
+  },
+  "devDependencies": {
+    "mocha": "~1.21.0",
+    "istanbul": "~0.3.0",
+    "sinon": "~1.10.3"
+  },
+  "keywords": [
+    "npm",
+    "update",
+    "change",
+    "history",
+    "update",
+    "date"
+  ],
+  "author": "enobufs",
+  "license": "MIT"
+}
