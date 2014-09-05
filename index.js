@@ -1,5 +1,8 @@
+'use strict';
+
 var npm = require('npm');
 var fs = require('fs');
+var util = require('util');
 var semver = require('semver');
 var async = require('async');
 var _und = require('underscore');
@@ -11,6 +14,9 @@ var defaults = {
     dev: false,
     reverse: false
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// WhatHappened classes
 
 function WhatHappened(option) {
     this._option = _und.defaults(option || {}, defaults);
@@ -27,12 +33,17 @@ WhatHappened.prototype.start = function start(cb) {
                 return void(cb(err));
             }
 
+            try {
+                var json = require(data.path + '/package.json');
+            } catch (e) {
+                return void(cb(new NotRootError(e.message)));
+            }
+
             var module = data.name + '@' + data.version;
             var deps = self._option.dev?(data.devDependencies || {}):{};
-            debug('keys=' + JSON.stringify(Object.keys(deps)));
             _und.extend(deps, (data.dependencies || {}));
 
-            self._traverse(require(data.path + '/package.json'), deps, module, function (err) {
+            self._traverse(json, deps, module, function (err) {
                 if (err) {
                     debug('Error:', err);
                     return void(cb(err));
@@ -48,11 +59,30 @@ WhatHappened.prototype.start = function start(cb) {
 
 WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
     var self = this;
+    var error;
     var tasks = [];
+
     Object.keys(deps).forEach(function (name) {
+        if (error) {
+            return; // skip
+        }
+
         var ver = deps[name].version;
         var spec = json.dependencies[name];
         var module = name + '@' + ver;
+
+        if (!ver) {
+            error = new NotInstalledError(name + ' is not installed');
+            return;
+        }
+
+        try {
+            var nextJson = require(deps[name].realPath + '/package.json');
+        } catch (e) {
+            error = new NotInstalledError(e.message);
+            return;
+        }
+
         tasks.push(function (next) {
             var myPath = path + ':' + module;
             if (semver.validRange(spec)) {
@@ -62,6 +92,7 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
                     }
 
                     var history = pkg[ver].time;
+
                     Object.keys(history).forEach(function (ver) {
                         if (!semver.valid(ver)) {
                             return;
@@ -80,7 +111,7 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
 
                     if (deps[name].dependencies) {
                         self._traverse(
-                            require(deps[name].realPath + '/package.json'),
+                            nextJson,
                             deps[name].dependencies,
                             myPath,
                             next);
@@ -91,7 +122,7 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
             } else {
                 if (deps[name].dependencies) {
                     self._traverse(
-                        require(deps[name].realPath + '/package.json'),
+                        nextJson,
                         deps[name].dependencies,
                         myPath,
                         next);
@@ -102,21 +133,35 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
         });
     });
 
+    if (error) {
+        return void(cb(error));
+    }
+
     async.parallel(tasks, cb);
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// Error classes
+
+function NotRootError(message) {
+    this.name = 'NotRootError';
+    this.message = message;
+}
+util.inherits(NotRootError, Error);
+
+function NotInstalledError(message) {
+    this.name = 'NotInstalledError';
+    this.message = message;
+}
+util.inherits(NotInstalledError, Error);
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Exports
 
 module.exports = function(option, cb) {
     var wh = new WhatHappened(option);
     wh.start(cb);
 };
-
-
-module.exports({days: 14, dev: false}, function (err, results) {
-    if (err) {
-        process.exit(1);
-    }
-    results.forEach(function (item) {
-        console.log(new Date(item.date) + ': ' + item.ver + ', ' + item.path);
-    });
-    process.exit(0);
-});
+module.exports.NotRootError = NotRootError;
+module.exports.NotInstalledError = NotInstalledError;
