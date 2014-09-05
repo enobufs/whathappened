@@ -20,9 +20,6 @@ describe('test02', function () {
         npm.commands = this.npmCmds;
         delete this['npmCmds'];
     });
-    before(function () {
-        this.sandbox = sinon.sandbox.create();
-    });
     afterEach(function () {
         this.sandbox.restore();
     });
@@ -72,7 +69,7 @@ describe('test02', function () {
             }
             cb(null, pkg);
         });
-        wh({}, function (err, results) {
+        wh.create({}).start(function (err, results) {
             assert.ifError(err);
             assert(Array.isArray(results));
             assert.equal(results.length, 2);

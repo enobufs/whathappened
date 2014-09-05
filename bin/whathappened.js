@@ -10,6 +10,7 @@ var optimist = require('optimist')
     .default('t', 30)
     .boolean('dev', false)
     .boolean('r')
+    .alias('r', 'reverse')
     .alias('h', 'help');
 
 var argv = optimist.argv;
@@ -19,7 +20,7 @@ if (argv.help) {
     process.exit(0);
 }
 
-wh({days: argv.d, dev: argv.dev, reverse: argv.r}, function (err, results) {
+wh.create({days: argv.t, dev: argv.dev, reverse: argv.r}).start(function (err, results) {
     if (err) {
         if (err instanceof wh.NotRootError) {
             console.log('Error: ' + err.message);

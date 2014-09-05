@@ -20,11 +20,15 @@ describe('test01', function () {
         npm.commands = this.npmCmds;
         delete this['npmCmds'];
     });
-    before(function () {
-        this.sandbox = sinon.sandbox.create();
-    });
     afterEach(function () {
         this.sandbox.restore();
+    });
+
+    it('option default', function () {
+        var _wh = wh.create();
+        assert.strictEqual(_wh._option.days, 30);
+        assert.strictEqual(_wh._option.dev, false);
+        assert.strictEqual(_wh._option.reverse, false);
     });
 
     it('should return empty result', function (done) {
@@ -40,7 +44,7 @@ describe('test01', function () {
             assert(silent);
             cb(null, data);
         });
-        wh({}, function (err, results) {
+        wh.create({}).start(function (err, results) {
             assert.ifError(err);
             assert(Array.isArray(results));
             assert.equal(results.length, 0);
@@ -61,7 +65,7 @@ describe('test01', function () {
             assert(silent);
             cb(null, data);
         });
-        wh({}, function (err, results) {
+        wh.create({}).start(function (err, results) {
             assert(err);
             assert.equal(err.name, 'NotRootError');
             done();
@@ -78,7 +82,7 @@ describe('test01', function () {
         this.sandbox.stub(npm.commands, 'list', function (args, silent, cb) {
             cb(new Error('fake list error'));
         });
-        wh({}, function (err, results) {
+        wh.create({}).start(function (err, results) {
             assert(err);
             assert.equal(err.name, 'Error');
             done();

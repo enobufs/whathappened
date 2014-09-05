@@ -159,9 +159,10 @@ util.inherits(NotInstalledError, Error);
 ////////////////////////////////////////////////////////////////////////////////
 // Exports
 
-module.exports = function(option, cb) {
-    var wh = new WhatHappened(option);
-    wh.start(cb);
+module.exports = {
+    create: function create(option) {
+        return new WhatHappened(option);
+    },
+    NotRootError: NotRootError,
+    NotInstalledError: NotInstalledError
 };
-module.exports.NotRootError = NotRootError;
-module.exports.NotInstalledError = NotInstalledError;
