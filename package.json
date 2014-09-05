@@ -1,9 +1,11 @@
 {
   "name": "whathappened",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "List up recently updated modules.",
   "main": "index.js",
-  "bin": { "whathappened": "./bin/whathappened.js" },
+  "bin": {
+    "whathappened": "./bin/whathappened.js"
+  },
   "scripts": {
     "test": "DEBUG=whathappened node_modules/.bin/mocha",
     "cover": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- -R spec"
