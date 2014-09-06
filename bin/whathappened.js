@@ -34,7 +34,11 @@ wh.create({days: argv.t, dev: argv.dev, reverse: argv.r}).start(function (err, r
         process.exit(1);
     }
     results.forEach(function (item) {
-        console.log(new Date(item.date) + ': ' + item.ver + ', ' + item.path);
+        if (!item.prev) {
+            console.log(new Date(item.date) + ': ' + item.name + ' ?.?.?->' + item.ver + ', ' + item.path);
+        } else {
+            console.log(new Date(item.date) + ': ' + item.name + ' ' + item.prev + '->' + item.ver + ', ' + item.path);
+        }
     });
     process.exit(0);
 });

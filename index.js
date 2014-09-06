@@ -92,20 +92,45 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
                     }
 
                     var history = pkg[ver].time;
+                    var results = [];
 
                     Object.keys(history).forEach(function (ver) {
                         if (!semver.valid(ver)) {
                             return;
                         }
-                        if (semver.satisfies(ver, spec)) {
-                            var date = new Date(history[ver]).getTime();
-                            if (date >= self._since) {
-                                self._results.push({
-                                    'date': date,
-                                    'ver': ver,
-                                    'path': myPath
-                                });
-                            }
+                        if (!semver.satisfies(ver, spec)) {
+                            return;
+                        }
+                        results.push({
+                            'name': name,
+                            'date': new Date(history[ver]).getTime(),
+                            'ver': ver,
+                            'path': myPath
+                        });
+
+                        /*
+                        if (date >= self._since) {
+                            self._results.push({
+                                'date': date,
+                                'ver': ver,
+                                'path': myPath
+                            });
+                        }
+                        */
+                    });
+
+                    // Sort by version
+                    results.sort(function (lhs, rhs) {
+                        return semver.gt(lhs.ver, rhs.ver);
+                    });
+
+                    // Add prev.
+                    var prev = null;
+                    results.forEach(function (item) {
+                        item['prev'] = prev;
+                        prev = item.ver;
+                        if (item.date >= self._since) {
+                            self._results.push(item);
                         }
                     });
 
