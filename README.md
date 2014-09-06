@@ -1,4 +1,8 @@
 # whathappened
+
+[![NPM version](https://badge.fury.io/js/whathappened.svg)](http://badge.fury.io/js/whathappened)
+[![Build Status](https://travis-ci.org/enobufs/whathappened.svg?branch=master)](https://travis-ci.org/enobufs/whathappened)
+
 List up recently updated modules that are in the node module tree in your project.
 
 ## Why you would use this?
@@ -39,8 +43,8 @@ You can use this module directly from your javascript code. Please see ./bin/wha
 
 * start(cb) - start listing up modules that satisfy version range in corresponding package.json and that are recently changed. Callback arugments are as following:
     * {Error} err - When an error occurred.
-    * {array} results - List of items that describe:
+    * {array} results - List of items each of which has following properties:
         * {number} date - time (in msec UTC) when this item was updated.
-        * {string} ver - The version that was releaced at the `date`
-        * {string} prev - The previous version. May be null when the previous version is not available.
+        * {string} ver - The version that was released on the `date`
+        * {string} prev - The previous version. This may be null when the previous version is not available.
         * {string} path - Full path to the module delimited by ':' 
