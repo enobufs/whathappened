@@ -68,8 +68,13 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
         }
 
         var ver = deps[name].version;
-        var spec = json.dependencies[name];
         var module = name + '@' + ver;
+        var spec;
+        if (json.dependencies && json.dependencies[name]) {
+            spec = json.dependencies[name];
+        } else {
+            spec = '*';
+        }
 
         if (!ver) {
             error = new NotInstalledError(name + ' is not installed');
@@ -91,6 +96,10 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
                         return void(next(err));
                     }
 
+                    if (!pkg || !pkg[ver]) {
+                        return void(next(err));
+                    }
+
                     var history = pkg[ver].time;
                     var results = [];
 
@@ -107,16 +116,6 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
                             'ver': ver,
                             'path': myPath
                         });
-
-                        /*
-                        if (date >= self._since) {
-                            self._results.push({
-                                'date': date,
-                                'ver': ver,
-                                'path': myPath
-                            });
-                        }
-                        */
                     });
 
                     // Sort by version
