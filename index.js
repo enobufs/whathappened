@@ -1,7 +1,6 @@
 'use strict';
 
 var npm = require('npm');
-var fs = require('fs');
 var util = require('util');
 var semver = require('semver');
 var async = require('async');
@@ -29,7 +28,7 @@ WhatHappened.prototype.start = function start(cb) {
     npm.load(function () {
         npm.commands.list([], true, function (err, data) {
             if (err) {
-                debug('Error:', err);
+                debug('Failed to list npm modules:', err);
                 return void(cb(err));
             }
 
@@ -43,9 +42,9 @@ WhatHappened.prototype.start = function start(cb) {
             var deps = self._option.dev?(data.devDependencies || {}):{};
             _und.extend(deps, (data.dependencies || {}));
 
-            self._traverse(json, deps, module, function (err) {
+            self._traverse(json, deps, module, 0, function (err) {
                 if (err) {
-                    debug('Error:', err);
+                    debug('Failed to traverse into module ' + module + ' :', err);
                     return void(cb(err));
                 }
                 self._results.sort(function(lhs, rhs) {
@@ -57,7 +56,7 @@ WhatHappened.prototype.start = function start(cb) {
     });
 };
 
-WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
+WhatHappened.prototype._traverse = function _traverse(json, deps, path, depth, cb) {
     var self = this;
     var error;
     var tasks = [];
@@ -72,8 +71,14 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
         var spec;
         if (json.dependencies && json.dependencies[name]) {
             spec = json.dependencies[name];
-        } else {
+        } else if ((self._option.dev && !depth) && json.devDependencies && json.devDependencies[name]) {
+            spec = json.devDependencies[name];
+        } else if (json.bundleDependencies && json.bundleDependencies.indexOf(name) >= 0) {
             spec = '*';
+        } else if (json.bundledDependencies && json.bundledDependencies.indexOf(name) >= 0) {
+            spec = '*';
+        } else {
+            spec = 'invalid';
         }
 
         if (!ver) {
@@ -93,6 +98,7 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
             if (semver.validRange(spec)) {
                 npm.commands.view([module, 'time'], true, function (err, pkg) {
                     if (err) {
+                        debug('Failed to view module ' + module + ' at ' + path + ' :', err);
                         return void(next(err));
                     }
 
@@ -138,6 +144,7 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
                             nextJson,
                             deps[name].dependencies,
                             myPath,
+                            depth+1,
                             next);
                     } else {
                         next();
@@ -149,6 +156,7 @@ WhatHappened.prototype._traverse = function _traverse(json, deps, path, cb) {
                         nextJson,
                         deps[name].dependencies,
                         myPath,
+                        depth+1,
                         next);
                 } else {
                     next();
