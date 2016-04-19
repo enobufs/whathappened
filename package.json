@@ -1,6 +1,6 @@
 {
   "name": "whathappened",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "description": "List up recently updated modules.",
   "main": "index.js",
   "bin": {
