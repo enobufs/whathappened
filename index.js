@@ -4,7 +4,7 @@ var npm = require('npm');
 var util = require('util');
 var semver = require('semver');
 var async = require('async');
-var _und = require('underscore');
+var _ = require('lodash');
 var debug = require('debug')('whathappened');
 
 // defaults
@@ -18,7 +18,7 @@ var defaults = {
 // WhatHappened classes
 
 function WhatHappened(option) {
-    this._option = _und.defaults(option || {}, defaults);
+    this._option = _.defaults(option || {}, defaults);
     this._results = [];
     this._since = Date.now() - this._option.days*24*60*60*1000;
 }
@@ -40,7 +40,7 @@ WhatHappened.prototype.start = function start(cb) {
 
             var module = data.name + '@' + data.version;
             var deps = self._option.dev?(data.devDependencies || {}):{};
-            _und.extend(deps, (data.dependencies || {}));
+            _.extend(deps, (data.dependencies || {}));
 
             self._traverse(json, deps, module, 0, function (err) {
                 if (err) {

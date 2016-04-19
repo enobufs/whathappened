@@ -15,16 +15,16 @@
     "url": "git://github.com/enobufs/whathappened.git"
   },
   "dependencies": {
-    "semver": "~3.0.1",
     "async": "~0.9.0",
     "debug": "~1.0.4",
-    "underscore": "1.6.x",
+    "lodash": "^4.11.1",
+    "npm": "^2.15.3",
     "optimist": "~0.6.1",
-    "npm": "~1.4.27"
+    "semver": "~3.0.1"
   },
   "devDependencies": {
-    "mocha": "~1.21.0",
-    "istanbul": "~0.3.0",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
     "sinon": "~1.10.3"
   },
   "keywords": [
