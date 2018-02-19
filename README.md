@@ -9,6 +9,9 @@ List up recently updated modules that are in the node module tree in your projec
 During development, you may have come across a situation where even though you never changed your code, your application suddenly stopped working correctly. This is likely due to a change in one of your projects dependencies. This tool will help you listing up modules that are recently changed in chronological order so that you could quickly identify a change that may have caused the problem.
 
 
+## System Requirement
+* Node: >= 4.0.0
+
 ## Installation
     $ npm install -g whathappened
     
